@@ -1,6 +1,6 @@
 ## 1. 前言
 
-主要对前端学习进行记录与总结，方便后续复习学习。主要包括前端：JavaScript、CSS、HTML、TypeScript、Node.js、express、Koa、webpack、性能优化、可视化、Vus.js、React.js、工具函数等知识点。
+主要对前端学习进行记录与总结，方便后续复习学习。主要包括前端：JavaScript、CSS、HTML、TypeScript、Node.js、express、Koa、webpack、性能优化、可视化、Vus.js、React.js、工具函；后端：go、Node.js、数据库(mysql、monogoDB、redis)、nginx、等知识点。
 
 ## 2. JavaScript
 
