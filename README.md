@@ -348,3 +348,50 @@ console.log(res)
 
 ```
 
+#### 13.3.2 reduce()函数
+
+reduce.js
+
+```javascript
+
+/**
+ * 
+ * @param {Array} array 
+ * @param {Function} callback 
+ * @param {*} initValue 
+ * @returns 
+ */
+function reduce(array,callback,initValue) {
+  let result=initValue
+  for(let index=0;index<array.length;index++){
+    result=callback(result,array[index])
+  }
+  return result
+}
+```
+
+reduce.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./reduce.js"></script>
+  <title>封装reduce函数</title>
+
+</head>
+<body>
+  <script>
+    const arr=[1,2,3,4,5]
+    let result=reduce(arr,(curResult,value)=>{
+      return curResult +value
+    },10)
+    console.log(result)
+  </script>
+</body>
+</html>
+```
+
