@@ -395,3 +395,206 @@ reduce.html
 </html>
 ```
 
+#### 13.3.3 数组去重
+
+```js
+/**
+ * @description 利用indexOf()与forEach()方法数组去重
+ * @param {Array} array 
+ * @returns 
+ */
+function unique(array) {
+  const result=[]
+  array.forEach(element => {
+    if(result.indexOf(element)===-1){
+      result.push(element)
+    }
+  });
+  return result
+}
+
+function unique1(array) {
+  const result=array.filter((curItem,index,array)=>{
+    if(array.indexOf(curItem)===index){
+      return curItem
+    }
+  })
+  return result
+}
+
+/**
+ * @description 利用es6的Array.from()与 Set集合去重或展开运算符与Set()
+ * @param {Array} array 
+ * @returns 
+ */
+function unique2(array) {
+  // const result=Array.from(new Set(array))
+  // return result
+  return [...new Set(array)]
+}
+
+/**
+ * @description 使用对象去重
+ * @param {Array} array 
+ * @returns 
+ */
+function unique3(array) {
+  let result=[]
+  const obj={}
+  array.forEach((curItem)=>{
+    if(!obj.hasOwnProperty(curItem)){
+      obj[curItem]=true
+      result.push(curItem)
+    }
+  })
+  return result;
+}
+
+const a=[1,2,3,2,3,4,5,5,6]
+console.log(unique1(a))
+
+```
+
+#### 13.3.4 对象、数组拷贝之浅拷贝
+
+```js
+function shallowClone(target) {
+  if(typeof target==='object' && target!==null) {
+    if(Array.isArray(target)){
+      return [...target]
+    }else{
+      return {...target}
+    }
+  }else{
+    return target
+  }
+}
+
+/**
+ * @description 使用ES5进行浅拷贝
+ * @param {Array  || Object} target 
+ * @returns 
+ */
+function shallowClone1(target) {
+  if(typeof target==='object' && target!==null){
+    let result=Array.isArray(target)?[]:{}
+    for(let key in target){
+      if(target.hasOwnProperty(key)){
+        result[key]=target[key]
+      }
+    }
+    return result
+  }else{
+    return target
+  }
+  
+}
+
+let obj={a:1,b:3,c:{d:6}}
+const obj1=shallowClone1(obj)
+console.log(obj1)
+obj1.c.d=8
+console.log(obj1,obj)
+```
+
+#### 13.3.5 对象、数组拷贝之深拷贝
+
+```js
+/**
+ * @description 乞丐版
+ * @description 存在问题：1对象中有函数无法进行拷贝 2、无法对循环引用进行深拷贝
+ * @param {Array || Object} target 
+ * @returns 
+ */
+function deepClone1(target) {
+  return JSON.parse(JSON.stringify(target))
+}
+
+/**
+ * @description 高级版。利用递归 可解决无法拷贝对象中函数的问题。
+ * @param {Array || Object} target 
+ * @returns 
+ */
+function deepClone2(target) {
+  if(typeof target==='object'  && target!==null){
+    let result= Array.isArray(target)?[]:{}
+    for(let key in target){
+      if(target.hasOwnProperty(key)){
+        result[key]=deepClone2(target[key])
+      }
+    }
+    return result
+  }else{
+    return target
+  }
+  
+}
+
+/**
+ * @description 终极版  解决无法拷贝函数即无法深拷贝循环引用的问题
+ * @param {Array || Object} target 
+ * @param {*} map 
+ * @returns 
+ */
+function deepClone3(target,map=new Map()) {
+  if(typeof target==='object' && target!==null){
+    const catchTarget=map.get(target)
+    if(catchTarget){
+      return catchTarget
+    }
+    let result=Array.isArray(target)?[]:{}
+    map.set(target,result)
+    for(let key in target){
+      if(target.hasOwnProperty(key)){
+        result[key]=deepClone3(target[key],map)
+      }
+    }
+    return result
+  }else{
+    return target
+  }
+}
+
+
+/**
+ * @description 优化终极版 for in 循环会遍历原型数据，性能较差
+ * @param {Array || Object} target 
+ * @param {*} map 
+ * @returns 
+ */
+ function deepClone4(target,map=new Map()) {
+  if(typeof target==='object' && target!==null){
+    const catchTarget=map.get(target)
+    if(catchTarget){
+      return catchTarget
+    }
+    let isArray=Array.isArray(target)
+    let result=isArray?[]:{}
+    map.set(target,result)
+    if(isArray){
+      target.forEach((curItem,index) => {
+        result[index]=deepClone4(curItem,map)
+      });
+    }else{
+      Object.keys(target).forEach((key)=>{
+        result[key]=deepClone4(target[key],map)
+
+      })
+    }
+    return result
+  }else{
+    return target
+  }
+}
+
+let obj={a:1,b:3,c:{d:[1,2,3]},f:function (params) {
+},j:{h:20}}
+obj.c.d.push(obj.j)//循环引用
+obj.j.k=obj.c.d//循环引用
+const result=deepClone3(obj)
+result.c.d.push(1000)
+result.j.m=10000
+console.log(obj)
+console.log(result)
+```
+
