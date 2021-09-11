@@ -46,7 +46,7 @@
 
 
 
-## 13. 工具函数封装
+## 13. 封装工具函数
 
 ### 13.1 call()、apply()、bind()函数
 
@@ -596,5 +596,165 @@ result.c.d.push(1000)
 result.j.m=10000
 console.log(obj)
 console.log(result)
+```
+
+#### 13.3.6 数组扁平化
+
+```js
+/**
+ * @description 使用递归，对数组进行扁平化
+ * @param {Array} array 
+ * @returns 
+ */
+function flatten(array) {
+  let result=[]
+  array.forEach(curItem => {
+    if(Array.isArray(curItem)){
+      result=result.concat(flatten(curItem))
+    }else{
+      result=result.concat(curItem)
+    }
+    
+  });
+  return result
+}
+
+
+/**
+ * @description 使用some和concat对数组进行扁平化
+ * @param {Array} array 
+ * @returns 
+ */
+function flatten1(array) {
+  let result=[...array]  
+  while(result.some(curItem=>Array.isArray(curItem))){
+    result=[].concat(...result)
+  }
+  return result
+}
+
+const arr=[1,2,3,[4,5,6,[7,8],9],10]
+console.log(flatten1(arr))
+```
+
+#### 13.3.7 数组分块
+
+```js
+
+/**
+ * @description 数组分块
+ * @param {Array} array 
+ * @param {Number} size 
+ * @returns 
+ */
+function chunk(array,size=1) {
+  if(array.length===0){
+    return []
+
+  }
+  let result=[]
+  let tmp=[]
+  array.forEach(curItem => {
+    if(tmp.length===0){
+      result.push(tmp)
+    }
+    tmp.push(curItem)
+    if(tmp.length===size){
+      tmp=[]
+    }
+  });
+  return result;
+}
+
+const arr=[1,2,3,4,5,6,7]
+console.log(chunk(arr,3))
+```
+
+#### 13.3.8 数组差集
+
+```js
+
+/**
+ * @description 数组差集
+ * @param {Array} arr1 
+ * @param {Array} arr2 
+ * @returns 
+ */
+function arrayDifference(arr1,arr2=[]) {
+  if(arr1.length===0){
+    return []
+  }
+  if(arr2.length===0){
+    return arr1.slice()
+  }
+  let result = arr1.filter(curItem=> !arr2.includes(curItem))
+  return result
+}
+
+const arr=[1,2,4,5,6]
+const arr2=[2,3,5,0]
+console.log(arrayDifference(arr,arr2))
+```
+
+#### 13.3.9 删除指定数组中部分元素
+
+```js
+function pull(arr,...args) {
+  const result=[]
+  for(let index=0;index<arr.length;index++){
+    if(args.includes(arr[index])){
+      result.push(arr[index])
+      arr.splice(index,1)
+      index--
+    }
+  }
+  return result
+}
+
+function pullAll(arr,values) {
+  return pull(arr,...values)
+}
+const arr =[1,3,5,3,7]
+const arr1 =[1,3,5,3,7]
+console.log(pull(arr,1,7,3,7))
+console.log(pullAll(arr1,[1,7,3,7]))
+
+```
+
+#### 13.3.10 获取数组指定位置之前或之后的元素数组值
+
+```js
+/**
+ * @description 从左边开始返回原数组索引为size之后的值的数组，不改变原数组
+ * @param {Array} array 
+ * @param {Number} size 
+ * @returns 
+ */
+function drop(array,size=0) {
+  if(size===0){
+    return array
+  }
+  // return array.filter((curItem,index)=>{
+  //   return index<size
+  // })
+  return array.filter((curItem,index)=>index>=size)//简化
+}
+
+/**
+ * @description 从右边开始返回原数组索引为size之前的值的数组，不改变原数组
+ * @param {Array} array 
+ * @param {Number} size 
+ * @returns 
+ */
+function dropRight(array,size=0) {
+  if(size===0){
+    return array
+  }
+  return array.filter((curItem,index)=>index<array.length-index)
+}
+const arr=[1,2,3,45,6]
+console.log(drop(arr,3))
+console.log(dropRight(arr,3))
+
 ```
 
