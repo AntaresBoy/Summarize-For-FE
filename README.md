@@ -758,3 +758,455 @@ console.log(dropRight(arr,3))
 
 ```
 
+#### 13.3.11 实现instanceOf()关键字
+
+instanceof 在MDN上的解释：用于检测构造函数的原型是否出现在了实例对象的原型链
+
+```js
+/**
+ * 
+ * MDN解释:instanceof 用于检测构造函数的原型属性prototype是否出现在实例对象的原型链上_proto_                                                                                                                                                                                                                                                                                                                                                                                                                                
+ * 
+ * 手写实现instanceof:第一个参数：实例对象；第二个参数：构造函数
+ * 如果实例对象的原型等于构造函数的原型返回true
+ */
+
+function myInstanceof(instance, constructor) {
+  if (typeof instance !== 'object') {
+    throw 'the instance must be Object!'
+  }
+  if (typeof constructor !== 'function') {
+    throw 'the constructor must be Function!'
+  }
+  let prototype = instance.__proto__
+  while (prototype) {
+    if (!prototype.__proto__) {
+      return false
+    } else if (prototype === constructor.prototype) {
+      return true
+    } else {
+      prototype = prototype.__proto__
+    }
+  }
+}
+function supType() {}
+function subType() {}
+subType.prototype = new supType()
+const instance = new subType()
+console.log(myInstanceof(instance, supType)) //true
+
+```
+
+#### 13.3.12 多个对象合并
+
+```js
+function mergeObject(...args) {
+  const result={}
+  args.forEach((obj)=>{
+    Object.keys(obj).forEach(key=>{
+      if(result.hasOwnProperty(key)){
+        result[key]=[].concat(result[key],obj[key])
+      }else{
+        result[key]=obj[key]
+      }
+    })
+  })
+  return result
+}
+
+
+const obj1={
+  a:{a:1,b:2},
+  b:[1,2,3],
+  c:"lpq"
+}
+
+const obj2={
+  a:{c:3},
+  b:4
+}
+console.log(mergeObject(obj1,obj2))
+
+```
+
+#### 13.3.13 字符传操作（翻转、回文、截取）
+
+```js
+/**
+ * @description 字符串翻转
+ * @param {String} str 
+ * @returns 
+ */
+function reverseString(str) {
+  const chartList=str.split("")
+  chartList.reverse()
+  const result=chartList.join("")
+  return result
+}
+
+/**
+ * @description 判断字符串是否为回文字符串
+ * @param {String} str 
+ * @returns 
+ */
+function palindrome(str) {
+  return reverseString(str)===str
+}
+
+/**
+ * @description 截取字符串
+ * @param {String} str 
+ * @param {Number} size 
+ * @returns 
+ */
+function truncate(str,size) {
+  return str.slice(0,size)+'...'
+}
+
+
+const str1='i love you!'
+const str2='lol'
+console.log(reverseString(str1))
+console.log(palindrome(str2))
+console.log(truncate(str1,2))
+
+
+```
+
+#### 13.3.14 实现事件委托
+
+##### [JavaScript 事件流模型及事件委托详解](https://segmentfault.com/a/1190000015719043)
+
+实现：
+
+addEventListener.js
+
+```js
+/**
+ * @description 实现事件委托
+ * @param {any} el 
+ * @param {String} type 
+ * @param {Function} callback 
+ * @param {String} selector 
+ */
+function addEventListener(el,type,callback,selector) {
+  //判断元素类型
+  if(typeof el==='string'){
+    el=document.querySelector(el)
+  }
+  //如果没有传递子元素选择器，给父元素el绑定事件
+  if(!selector){
+    el.addEventListener(type,callback)
+  } else{
+    el.addEventListener(type,function (e) {
+      //获取点击目标事件源
+      const target=e.target
+      //判断选择器与目标元素类型是否相等
+      if(target.matches(selector)){
+        callback.call(target,e)
+      }
+    })
+  }
+}
+```
+
+addEventListener.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./addeventListener.js"></script>
+  <title>事件委托</title>
+</head>
+<body>
+  <ul id="bubbleEvent">
+    <li>AAAA</li>
+    <li>BBBB</li>
+    <li>CCCC</li>
+    <li>DDDD</li>
+    <div>EEEE</div>
+  </ul>
+<script>
+addEventListener('#bubbleEvent','click',function(e){
+  console.log(this.innerHTML)
+},'li')
+</script>
+</body>
+</html>
+```
+
+#### 13.3.15 手写全局事件总线eventBus
+
+```js
+const eventBus={
+  callbacks:{}
+}
+
+/**
+ * @description 绑定事件
+ * @param {String} eventName 
+ * @param {Function} callback 
+ */
+eventBus.on=function (eventName,callback) {
+  if(this.callbacks[eventName]){
+    this.callbacks[eventName].push(callback)
+  }else{
+    this.callbacks[eventName]=[callback]
+  }
+}
+
+/**
+ * @description 触发事件
+ * @param {String} eventName 
+ * @param {...any} data 
+ */
+eventBus.emit=function (eventName,data) {
+  if(this.callbacks[eventName]&&this.callbacks[eventName].length>0){
+    this.callbacks[eventName].forEach(callback=> {
+      callback(data)
+    });
+  }
+}
+
+/**
+ * @description 解绑事件
+ * @param {String | Array} eventName 
+ */
+eventBus.off=function (eventName) {
+  if(!eventName){
+    this.callbacks={}
+   }else if(Array.isArray(eventName)){
+    eventName.forEach(item=>delete this.callbacks[item])
+   }else{
+    delete this.callbacks[eventName]
+  }
+}
+
+eventBus.on('login',(data)=>{
+  console.log(data+'登录了')
+})
+eventBus.on('login',(data)=>{
+  console.log(data+'写入了')
+})
+eventBus.on('logout',(data)=>{
+  console.log(data+'登出了')
+})
+
+eventBus.emit('login','lpq')
+eventBus.off('login')
+eventBus.off(['login','logout'])
+console.log(eventBus)
+```
+
+#### 13.3.16 实现消息订阅与发布PubSub
+
+```js
+const PubSub={
+  id:1,
+  callbacks:{
+    // chanelName:{
+    //   token:fn
+    // }
+  }
+}
+
+/**
+ * @description 订阅消息
+ * @param {String} chanelName 
+ * @param {Function} callback 
+ */
+PubSub.subscribe=function (chanelName,callback) {
+  const token='token_'+this.id++
+  if(this.callbacks[chanelName]){
+    this.callbacks[chanelName][token]=callback
+  }else{
+    this.callbacks[chanelName]={
+      [token]:callback
+    }
+  }
+  return token//返回唯一pid
+}
+
+/**
+ * @description 发布消息
+ * @param {String} chanelName 
+ * @param {...any} data 
+ */
+PubSub.publish=function (chanelName,data) {
+if(this.callbacks[chanelName]){
+  Object.values( this.callbacks[chanelName]).forEach(callback=>{
+    callback(data)//执行回调
+  })
+}
+}
+
+/**
+ * @description 1.如果没有传值，则清除所有订阅 2、传入pid清除pid的订阅 3 传入chanelName 将chanelName下的所有订阅清除
+ * @param {undefined | String } flag 
+ */
+PubSub.unsubscribe=function (flag) {
+  if(!flag){
+    this.callbacks={}
+  }else if(typeof flag==='string'){
+    if(!flag.indexOf('token_')){
+    const callbackObj= Object.values(this.callbacks).find(curObj=> curObj.hasOwnProperty(flag))
+    //可能为null,有则删除
+    if(callbackObj){
+      delete callbackObj[flag]
+    }
+    }else{
+      delete this.callbacks[flag]
+    }
+  }
+}
+
+//先订阅后发布
+const pid1=PubSub.subscribe('login',(data)=>{
+  console.log(data)
+})
+const pid2=PubSub.subscribe('login',(data)=>{
+  console.log(data)
+})
+const pid3=PubSub.subscribe('logout',(data)=>{
+  console.log(data)
+})
+// PubSub.unsubscribe('login')
+PubSub.publish('login',"lpq-login")
+PubSub.publish('logout',"lpq - logout")
+
+```
+
+#### 13.3.17 封装axios()函数
+
+axios.js:
+
+```js
+
+  function axios({method, url, params, data}){
+  //方法转化大写
+  method = method.toUpperCase();
+  //返回值
+  return new Promise((resolve, reject) => {
+      //四步骤
+      //1. 创建对象
+      const xhr = new XMLHttpRequest();
+      //2. 初始化
+      //处理 params 对象 a=100&b=200
+      let str = '';
+      for(let k in params){
+          str += `${k}=${params[k]}&`;
+      }
+      str = str.slice(0, -1);
+      xhr.open(method, url+'?'+str);
+      //3. 发送
+      if(method === 'POST' || method === 'PUT' || method === 'DELETE'){
+          //Content-type mime类型设置
+          xhr.setRequestHeader('Content-type','application/json');
+          //设置请求体
+          xhr.send(JSON.stringify(data));
+      }else{
+          xhr.send();
+      }
+      //设置响应结果的类型为 JSON
+      xhr.responseType = 'json';
+      //4. 处理结果
+      xhr.onreadystatechange = function(){
+          //
+          if(xhr.readyState === 4){
+              //判断响应状态码 2xx
+              if(xhr.status >= 200 && xhr.status < 300){
+                  //成功的状态
+                  resolve({
+                      status: xhr.status,
+                      message: xhr.statusText,
+                      body: xhr.response
+                  });
+              }else{
+                  reject(new Error('请求失败, 失败的状态码为' + xhr.status));
+              }
+          }
+      }
+
+  });
+}
+
+axios.get = function(url, options){
+  //发送 AJAX 请求 GET
+  let config = Object.assign(options, {method:'GET', url: url});
+ console.log(config)
+  return axios(config);
+}
+
+axios.post = function(url, options){
+  //发送 AJAX 请求 POST
+  let config = Object.assign(options, {method:'POST', url: url});
+  return axios(config);
+}
+
+axios.put = function(url, options){
+  //发送 AJAX 请求 PUT
+  let config = Object.assign(options, {method:'PUT', url: url});
+  return axios(config);
+}
+
+axios.delete = function(url, options){
+  //发送 AJAX 请求 DELETE
+  let config = Object.assign(options, {method:'delete', url: url});
+  return axios(config);
+}
+
+
+```
+
+axios.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./axios.js"></script>
+  <title>封装axios</title>
+</head>
+<body>
+  <script>
+    // axios({
+    //   //请求类型
+    //   method:"POST",
+    //   //请求对的url
+    //   url:'https://api.apiopen.top/getJoke',
+    //   //请求参数
+    //   params:{
+    //     a:100,
+    //     b:200
+    //   },
+    //   data:{
+    //     c:300,
+    //     d:400
+    //   }
+    // }).then((response) => {
+    //   console.log(response)
+    // }).catch((errReason) => {
+    //   console.log(errReason)
+    // });
+   
+  axios.get('https://api.apiopen.top/getJoke',{params: {
+  a:100,
+  b:200
+}
+}).then((response) => {
+  console.log(response)
+}).catch((errReason) => {
+  console.log(errReason)
+});
+  </script>
+</body>
+</html>
+```
+
