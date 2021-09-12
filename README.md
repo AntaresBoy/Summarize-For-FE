@@ -1210,3 +1210,97 @@ axios.html
 </html>
 ```
 
+#### 13.3.18 制作npm包
+
+1. 创建工具包项目，在项目中新建webpack.config.js（指定打包位置极其文件名，后续引入打包dist文件时使用）
+
+   ```js
+   //引入 nodeJS 内置模块 path
+   const path = require('path');
+   
+   module.exports = {
+     // 模式
+     mode: 'development', // 也可以使用 production
+     // 入口
+     entry: './src/index.js', 
+     // 出口
+     output: {
+       // 打包文件夹
+       path: path.resolve(__dirname, 'dist'),
+       // 打包文件
+       filename: 'atguigu-utils.js', 
+       // 向外暴露的对象的名称
+       library: 'utils',
+       // 打包生成库可以通过esm/commonjs/reqirejs的语法引入
+       libraryTarget: 'umd', 
+     }
+   }
+   ```
+
+   
+
+2. 完善package.json
+
+   ```json
+   {
+     "name": "mine-own-util",
+     "version": "1.0.0",
+     "description": "",
+     "main": "./dist/atguigu-utils.js",
+     "directories": {
+       "test": "test"
+     },
+     "scripts": {
+       "test": "echo \"Error: no test specified\" && exit 1",
+        "build:watch": "webpack --watch"
+     },
+     "keywords": [
+       "atguigu",
+       "utils",
+       "array",
+       "object",
+       "function",
+       "string",
+       "axios",
+       "event-bus",
+       "pub-sub"
+     ],
+     "author": "",
+     "license": "ISC",
+     "dependencies": {
+       "webpack": "^5.16.0",
+       "webpack-cli": "^4.4.0"
+     }
+   }
+   
+   ```
+
+   - name:必须是在npm仓库中唯一的名称
+   - main:b必须指定为打包生成的js文件
+   - keywords:用于可以在npm仓库中能搜到的关键字
+
+3. npm配置
+
+   ```json
+   npm配置中央仓库不能是淘宝仓库
+   发布前必须执行：npm config set registry https://registry.npmjs.org/
+   不用发布时：npm config set registry https://registry.npm.taobao.org/
+   查看配置：npm config list
+   ```
+
+4. 注册npm中央仓库账号
+
+   ```
+   注册地址：https://www.npmjs.com/
+   关键信息：用户名、密码、邮箱验证
+   发布：npm publish
+   修改代码后，更新npm包需要更改package.jsson中的版本号： "version": "1.0.0"---> "version": "1.0.1"
+   ```
+
+5. 删除npm包
+
+   ```json
+   删除npm包：执行npm unpublish --force
+   注：必须在72h内删除，否则不能再删除
+   ```
+
