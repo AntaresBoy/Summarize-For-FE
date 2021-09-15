@@ -1304,3 +1304,51 @@ axios.html
    注：必须在72h内删除，否则不能再删除
    ```
 
+### 13.4 利用Set()集合处理数组
+
+```js
+/**
+ * @description 数组去重
+ * @param {Array} array 
+ */
+function unique(array) {
+  return [...new Set(array)]
+}
+
+/**
+ * @description 数组交集
+ * @param {Array} arr1 
+ * @param {Array} arr2 
+ */
+function mixedArray(arr1, arr2) {
+  return [...new Set(arr1)].filter(item => arr2.includes(item))
+}
+
+/**
+ * @description 两数组取并集--数据不重复
+ * @param {Array} arr1 
+ * @param {Array} arr2 
+ */
+function unionArray(arr1, arr2) {
+  return [...new Set([...new Set(arr1), ...new Set(arr2)])]
+}
+
+/**
+ * @description 数组差集
+ * @param {Array} arr1 
+ * @param {Array} arr2 
+ */
+function diffArray(arr1, arr2) {
+  return [...new Set(arr1)].filter(item => !arr2.includes(item))
+
+}
+
+const arr2 = [1, 2, 2, 4]
+const arr1 = [1, 2, 3, 4, 4, 10, 11]
+// console.log(unique(arr1))
+// console.log(mixedArray(arr1, arr2))
+// console.log(unionArray(arr1, arr2))
+console.log(diffArray(arr1, arr2))
+
+```
+
