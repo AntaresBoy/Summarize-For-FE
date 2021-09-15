@@ -578,3 +578,415 @@ app.listen('8000',()=>{
 ### 8.3 验证结果
 
 ![image-20210915001729149](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210915001729149.png)
+
+## 9.axios发送get () post()请求
+
+### 9.1 axios.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script crossorigin="anonymous"  src="https://cdn.bootcdn.net/ajax/libs/axios/0.21.1/axios.min.js"></script>
+  <title>axios</title>
+</head>
+<body>
+  <button>GET</button>
+  <button>POST</button>
+  <button>AJAX</button>
+  <script>
+    const btns=document.querySelectorAll('button')
+    axios.defaults.baseURL='http://localhost:8000'
+    //get
+    btns[0].onclick=()=>{
+      axios.get('/axios-server',{params:{username:"lpq",age:18},headers:{name:'lpq1',age:19}}).then((value)=>{
+        console.log(value)
+
+      })
+    }
+    //post
+    btns[1].onclick=()=>{
+      axios.post('/axios-server',{username:"lpq",age:18},{params:{name:'lpq1',age:19},headers:{height:169,weight:60}}).then(value=>console.log(value.data))
+    }
+    //通用方法
+    btns[2].onclick=()=>{
+      axios({
+        //请求方法
+        method:'POST',
+        //url
+        url:'/axios-server',
+        //请求行
+        params:{
+          level:30,
+          vip:0
+        },
+        //请求头
+        headers:{
+          a:100,
+          b:200
+        },
+        //请求体
+        data:{
+          name:'lpq',
+          age:18
+        }
+      }).then(res=>console.log(res))//响应结果
+    }
+  </script>
+</body>
+</html>
+```
+
+### 9.2 Server.js
+
+```js
+const  express=require('express')
+const app=express()
+app.get('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.send('hello express!')
+})
+// app.post('/server',(req,res)=>{
+//   res.setHeader('Access-Control-Allow-Origin','*')
+//   res.send('send ajax post!')
+// })
+//所有请求都会接受
+app.all('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  res.send('send ajax post!')
+})
+
+app.all('/axios-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+app.listen('8000',()=>{
+  console.log("服务已启动！")
+})
+```
+
+## 10.利用fetch()函数发送请求
+
+### 10.1 fetch.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fetch函数发送请求</title>
+</head>
+<body>
+  <button>fetch函数发送请求</button>
+  <script>
+    const btn=document.querySelector('button')
+    const url='http://localhost:8000/fetch-server?name=lpq'
+    btn.onclick=()=>{
+      fetch(url,{
+        method:'POST',
+        headers:{
+          a:100,
+          b:200
+        },
+        body:'username=admin&password=admin'
+      }).then(response=>{
+        console.log(response)
+        return response.json()
+      }).then(response=>{
+        console.log(response)
+      })
+    }
+  </script>
+</body>
+</html>
+```
+
+### 10.2 Server.js
+
+```js
+const  express=require('express')
+const app=express()
+app.get('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.send('hello express!')
+})
+// app.post('/server',(req,res)=>{
+//   res.setHeader('Access-Control-Allow-Origin','*')
+//   res.send('send ajax post!')
+// })
+//所有请求都会接受
+app.all('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  res.send('send ajax post!')
+})
+
+app.all('/axios-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+
+//fetch函数
+app.all('/fetch-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+
+app.listen('8000',()=>{
+  console.log("服务已启动！")
+})
+```
+
+## 11.跨域问题
+
+条件：请求方与响应方的协议、域名、端口号必须同时一致称为同源策略，否则就会跨域
+
+### 11.1解决跨域---JSONP
+
+利用script标签天然可跨域的优势进行处理跨域问题。
+
+在src中填写服务端url地址，在服务端返回js代码，在浏览器中执行
+
+缺点：只能处理get()请求的跨域问题。
+
+#### 11.1.1 JSONP.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jsonp解决跨域</title>
+  <style>
+    #result{
+      height: 300px;
+      width: 200px;
+      border: solid;
+    }
+  </style>
+</head>
+<body>
+  <!-- <button>点我发送请求</button> -->
+  <div id="result"></div>
+  <script>
+    function handle(data){
+      const result=document.getElementById('result')
+      result.innerHTML=data.name
+    }
+  </script>
+  <script src="http://localhost:8000/jsonp-server"></script>
+</body>
+</html>
+```
+
+#### 11.1.2 Server.js
+
+```js
+const  express=require('express')
+const app=express()
+app.get('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.send('hello express!')
+})
+// app.post('/server',(req,res)=>{
+//   res.setHeader('Access-Control-Allow-Origin','*')
+//   res.send('send ajax post!')
+// })
+//所有请求都会接受
+app.all('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  res.send('send ajax post!')
+})
+
+app.all('/axios-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+
+//fetch函数
+app.all('/fetch-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+
+//jsonp服务
+app.all('/jsonp-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  const str=JSON.stringify(data)
+  res.end(`handle(${str})`)//返回函数调用(数据作为参数)
+})
+
+app.listen('8000',()=>{
+  console.log("服务已启动！")
+})
+```
+
+#### 11.1.3 结果展示
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210915230152967.png" alt="image-20210915230152967" style="zoom:150%;" />
+
+### 11.2  CORS
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210915231234040.png" alt="image-20210915231234040" style="zoom:150%;" />
+
+#### 11.2.1 CORS.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORS解决跨域</title>
+  <style>
+    #result{
+      height: 200px;
+      width: 200px;
+      border: solid;
+    }
+  </style>
+</head>
+<body>
+  <div id="result"></div>
+  <button>发送请求</button>
+  <script>
+    const result=document.getElementById('result')
+    const  btn=document.querySelector('button')
+    btn.onclick=()=>{
+      const xhr=new XMLHttpRequest()
+      xhr.open('POST','http://localhost:8000/cors-server')
+      xhr.send()
+      xhr.responseType='json'
+      xhr.onreadystatechange=()=>{
+        if(xhr.readyState===4){
+          if(xhr.status>=200&&xhr.status<300){
+           result.innerHTML= xhr.response.name
+           console.log(xhr.response)
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+```
+
+#### 11.2.2  服务端设置头部信息-Server.js
+
+```js
+const  express=require('express')
+const app=express()
+app.get('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.send('hello express!')
+})
+// app.post('/server',(req,res)=>{
+//   res.setHeader('Access-Control-Allow-Origin','*')
+//   res.send('send ajax post!')
+// })
+//所有请求都会接受
+app.all('/server',(req,res)=>{
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  res.send('send ajax post!')
+})
+
+app.all('/axios-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+
+//fetch函数
+app.all('/fetch-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+
+//jsonp服务
+app.all('/jsonp-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')
+  res.setHeader('Access-Control-Allow-Headers','*')
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  const str=JSON.stringify(data)
+  res.end(`handle(${str})`)
+})
+
+//CORS跨域
+app.all('/cors-server',(req,res)=>{
+  //允许跨域
+  res.setHeader('Access-Control-Allow-Origin','*')//允许所有网页
+  res.setHeader('Access-Control-Allow-Headers','*')//允许所有头部信息
+  res.setHeader('Access-Control-Allow-Method','*')//允许所有请求方法
+  const data={
+    name:'lpq',
+    age:"18"
+  }
+  res.send(JSON.stringify(data))
+})
+app.listen('8000',()=>{
+  console.log("服务已启动！")
+})
+```
+
