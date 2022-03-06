@@ -114,4 +114,4 @@ npm i pre-commit -D
 
 ```
 
-配置完成后只要代码在commit之前会执行npm run lint命令对提交代码进行检查，如果符合要求则运行通过，否则会报错组织git 提交
+配置完成后只要代码在commit之前会执行npm run lint命令对提交代码进行检查，如果符合要求则运行通过，否则会报错阻止git 提交
