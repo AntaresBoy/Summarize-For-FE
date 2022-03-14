@@ -2,9 +2,7 @@
 
 ## 概述
 
-技术栈：UI：vue3、elementPlus、TypeScript、webpack
-
-Server:KOA2、Nodejs、Nginx、redis、Mysql、PM2
+技术栈：KOA2、Nodejs、Nginx、redis、Mysql、PM2
 
 服务器：阿里云ubuntu系统 1核2G
 
